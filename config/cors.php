@@ -12,8 +12,6 @@ $allowedOrigins = array_filter([
   getenv('FRONTEND_URL'),           // Production frontend URL
   getenv('FRONTEND_URL_DEV'),       // Development frontend URL
   // Development defaults (only if no env vars set)
-  !getenv('FRONTEND_URL') && !getenv('FRONTEND_URL_DEV') ? 'http://localhost:3000' : null,
-  !getenv('FRONTEND_URL') && !getenv('FRONTEND_URL_DEV') ? 'http://127.0.0.1:3000' : null,
   !getenv('FRONTEND_URL') && !getenv('FRONTEND_URL_DEV') ? 'http://192.168.1.5:3000' : null,
 ]);
 

@@ -115,7 +115,7 @@ try {
         exit;
     }
 
-    // Models to try - بدون exp
+    // Models to try
     $models_to_try = [
         'gemini-2.5-flash',
         'gemini-2.0-flash'

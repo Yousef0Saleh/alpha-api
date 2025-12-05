@@ -2,7 +2,7 @@
 // Load environment variables
 require_once __DIR__ . '/env.php';
 
-$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_host = getenv('DB_HOST') ?: 'localhost';
 $db_name = getenv('DB_NAME') ?: 'alpha';
 $db_user = getenv('DB_USER') ?: 'root';
 $db_pass = getenv('DB_PASS') ?: '';

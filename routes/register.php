@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/cors.php';
 header("Content-Type: application/json; charset=UTF-8");
-require_once __DIR__ . '/../config/cors.php'; // مهم يكون دومين محدد
 
 // limit request size (e.g. 1MB)
 $maxLen = 1024 * 1024; // 1MB
@@ -12,7 +12,22 @@ if ($length > $maxLen) {
 }
 
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../utils/email.php';
+
+// Email system - attempt to load with proper error handling
+$emailAvailable = false;
+if (file_exists(__DIR__ . '/../utils/email.php')) {
+  try {
+    // Suppress any warnings/errors during require
+    @require_once __DIR__ . '/../utils/email.php';
+    // Check if the function exists after loading
+    if (function_exists('sendEmailVerification')) {
+      $emailAvailable = true;
+    }
+  } catch (Throwable $e) {
+    error_log('[REGISTER] Failed to load email utils: ' . $e->getMessage());
+    $emailAvailable = false;
+  }
+}
 
 // read body & decode
 $input = file_get_contents('php://input');
@@ -77,20 +92,31 @@ try {
     ':token' => $verificationToken
   ]);
 
-  // Send verification email
-  $emailSent = sendEmailVerification($email, $name, $verificationToken);
+  // Try to send verification email (but don't fail registration if it fails)
+  $emailSent = false;
+  if ($emailAvailable && function_exists('sendEmailVerification')) {
+    try {
+      $emailSent = sendEmailVerification($email, $name, $verificationToken);
 
-  // For testing - log the token
-  error_log("VERIFICATION TOKEN: $verificationToken");
+      // For testing - log the token
+      error_log("VERIFICATION TOKEN: $verificationToken");
 
-  if (!$emailSent) {
-    error_log("[REGISTER] Failed to send verification email to: $email");
+      if (!$emailSent) {
+        error_log("[REGISTER] Failed to send verification email to: $email");
+      }
+    } catch (Exception $e) {
+      error_log("[REGISTER] Email sending exception: " . $e->getMessage());
+    }
+  } else {
+    error_log("[REGISTER] Email system not available");
   }
 
-  // created
+  // created - successful even if email fails
   respond(201, [
     "status" => "success",
-    "message" => "تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني لتفعيل حسابك",
+    "message" => $emailSent
+      ? "تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني لتفعيل حسابك"
+      : "تم إنشاء الحساب بنجاح!",
     "email_sent" => $emailSent
   ]);
 } catch (PDOException $e) {

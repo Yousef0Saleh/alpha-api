@@ -270,7 +270,7 @@ function getEmailVerificationTemplate($toName, $verifyUrl)
                     
                     <!-- Header -->
                     <tr>
-                        <td style="padding: 40px 40px 30px; text-align: center; background-color: #10B981; color: #ffffff;">
+                        <td style="padding: 40px 40px 30px; text-align: center; background-color: #4F46E5; color: #ffffff;">
                             <h1 style="margin: 0; font-size: 28px; font-weight: 700; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">منصة ألفا</h1>
                             <p style="margin: 8px 0 0; font-size: 14px; opacity: 0.9;">مرحباً بك في منصتك التعليمية</p>
                         </td>
@@ -292,7 +292,7 @@ function getEmailVerificationTemplate($toName, $verifyUrl)
                             <!-- Button -->
                             <table role="presentation" style="margin: 0 auto 30px; border-collapse: collapse;">
                                 <tr>
-                                    <td style="border-radius: 8px; background-color: #10B981;">
+                                    <td style="border-radius: 8px; background-color: #4F46E5;">
                                         <a href="{$verifyUrl}" target="_blank" style="display: inline-block; padding: 14px 32px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
                                             تأكيد البريد الإلكتروني
                                         </a>
@@ -303,7 +303,7 @@ function getEmailVerificationTemplate($toName, $verifyUrl)
                             <p style="margin: 0 0 8px; color: #6B7280; font-size: 14px; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
                                 أو انسخ الرابط التالي في المتصفح:
                             </p>
-                            <p style="margin: 0 0 30px; padding: 12px; background-color: #F3F4F6; border-radius: 6px; color: #10B981; font-size: 13px; word-break: break-all; direction: ltr; text-align: left; font-family: monospace;">
+                            <p style="margin: 0 0 30px; padding: 12px; background-color: #F3F4F6; border-radius: 6px; color: #4F46E5; font-size: 13px; word-break: break-all; direction: ltr; text-align: left; font-family: monospace;">
                                 {$verifyUrl}
                             </p>
                             

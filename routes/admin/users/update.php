@@ -67,6 +67,13 @@ try {
   $stmt = $pdo->prepare("UPDATE users SET name = :name, grade = :grade, role = :role WHERE id = :user_id");
   $stmt->execute([':name' => $name, ':grade' => $grade, ':role' => $role, ':user_id' => $user_id]);
 
+  // If user is editing their own profile, update session data
+  if (isset($_SESSION['user']) && $_SESSION['user']['id'] == $user_id) {
+    $_SESSION['user']['name'] = $name;
+    $_SESSION['user']['grade'] = $grade;
+    $_SESSION['user']['role'] = $role;
+  }
+
   // تسجيل التغييرات
   $changes = [];
   if ($old_user['name'] !== $name)
