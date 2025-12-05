@@ -69,7 +69,7 @@ CREATE TABLE `chat_usage_limits` (
   `user_id` int(11) NOT NULL,
   `messages_today` int(11) DEFAULT 0,
   `files_today` int(11) DEFAULT 0,
-  `last_reset_date` date DEFAULT curdate()
+  `last_reset_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

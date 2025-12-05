@@ -80,44 +80,18 @@ $hashed = password_hash($password, $algo);
 
 // insert user
 try {
-  // Generate verification token
-  $verificationToken = bin2hex(random_bytes(32)); // 64 character hex string
-
-  $stmt = $pdo->prepare("INSERT INTO users (name, email, password, grade, email_verified, email_verification_token) VALUES (:name, :email, :password, :grade, FALSE, :token)");
+  $stmt = $pdo->prepare("INSERT INTO users (name, email, password, grade, email_verified) VALUES (:name, :email, :password, :grade, TRUE)");
   $stmt->execute([
     ':name' => $name,
     ':email' => $email,
     ':password' => $hashed,
-    ':grade' => $grade,
-    ':token' => $verificationToken
+    ':grade' => $grade
   ]);
 
-  // Try to send verification email (but don't fail registration if it fails)
-  $emailSent = false;
-  if ($emailAvailable && function_exists('sendEmailVerification')) {
-    try {
-      $emailSent = sendEmailVerification($email, $name, $verificationToken);
-
-      // For testing - log the token
-      error_log("VERIFICATION TOKEN: $verificationToken");
-
-      if (!$emailSent) {
-        error_log("[REGISTER] Failed to send verification email to: $email");
-      }
-    } catch (Exception $e) {
-      error_log("[REGISTER] Email sending exception: " . $e->getMessage());
-    }
-  } else {
-    error_log("[REGISTER] Email system not available");
-  }
-
-  // created - successful even if email fails
+  // created - successful
   respond(201, [
     "status" => "success",
-    "message" => $emailSent
-      ? "تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني لتفعيل حسابك"
-      : "تم إنشاء الحساب بنجاح!",
-    "email_sent" => $emailSent
+    "message" => "تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن"
   ]);
 } catch (PDOException $e) {
   // Duplicate entry code for MySQL is 23000

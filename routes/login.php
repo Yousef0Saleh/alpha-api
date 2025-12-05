@@ -50,17 +50,6 @@ if (!$user) {
     exit;
 }
 
-// التحقق من التفعيل
-if (!$user['email_verified']) {
-    http_response_code(403);
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'يجب تفعيل البريد الإلكتروني أولاً',
-        'email_not_verified' => true
-    ]);
-    exit;
-}
-
 // التحقق من الحظر
 if ($user['is_banned']) {
     http_response_code(403);
