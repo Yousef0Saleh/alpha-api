@@ -52,7 +52,7 @@ function sendPasswordResetEmail($toEmail, $toName, $resetToken)
         $mail->addAddress($toEmail, $toName);
 
         // Build reset URL
-        $resetUrl = "http://192.168.1.5:3000/reset-password?token=" . urlencode($resetToken);
+        $resetUrl = "https://alpha-edu.up.railway.app/reset-password?token=" . urlencode($resetToken);
 
         // Content
         $mail->isHTML(true);
@@ -122,7 +122,7 @@ function sendEmailVerification($toEmail, $toName, $verificationToken)
         $mail->addAddress($toEmail, $toName);
 
         // Build verification URL
-        $verifyUrl = "http://192.168.1.5:3000/verify-email?token=" . urlencode($verificationToken);
+        $verifyUrl = "https://alpha-edu.up.railway.app/verify-email?token=" . urlencode($verificationToken);
 
         // Content
         $mail->isHTML(true);
