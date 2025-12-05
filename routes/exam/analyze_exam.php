@@ -355,7 +355,7 @@ try {
     foreach ($questions as $q) {
         $qId = intval($q['id']);
         $studentAnswerIndex = isset($answers[$qId]) ? intval($answers[$qId]) : null;
-        $correctAnswer = $q['answer'] ?? null;
+        $correctAnswer = $q['correct_answer'] ?? null;
         $options = $q['options'] ?? [];
 
         // Prepare correct answer text for AI
