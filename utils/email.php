@@ -1,14 +1,13 @@
 <?php
 /**
- * Email Utility Functions
+ * Email Utility Functions using SendGrid
  * منصة ألفا التعليمية
  */
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/env.php';
+
+use SendGrid\Mail\Mail;
 
 /**
  * Send password reset email
@@ -20,62 +19,52 @@ require_once __DIR__ . '/../config/env.php';
  */
 function sendPasswordResetEmail($toEmail, $toName, $resetToken)
 {
-    $mail = new PHPMailer(true);
-
     try {
-        // Get SMTP settings from environment
-        $smtpHost = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
-        $smtpPort = getenv('SMTP_PORT') ?: 587;
-        $smtpUsername = getenv('SMTP_USERNAME') ?: '';
-        $smtpPassword = getenv('SMTP_PASSWORD') ?: '';
-        $smtpFromEmail = getenv('SMTP_FROM_EMAIL') ?: 'noreply@alpha.edu';
-        $smtpFromName = getenv('SMTP_FROM_NAME') ?: 'منصة ألفا';
+        // Get SendGrid API key
+        $sendgridApiKey = getenv('SENDGRID_API_KEY');
+        $fromEmail = getenv('SMTP_FROM_EMAIL') ?: '1yousefsaleh@gmail.com';
+        $fromName = getenv('SMTP_FROM_NAME') ?: 'منصة ألفا';
 
-        // If SMTP not configured, log and return false
-        if (empty($smtpUsername) || empty($smtpPassword)) {
-            error_log('[EMAIL] SMTP credentials not configured in .env file');
+        if (empty($sendgridApiKey)) {
+            error_log('[EMAIL] SendGrid API key not configured');
             return false;
         }
 
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = $smtpHost;
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtpUsername;
-        $mail->Password = $smtpPassword;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $smtpPort;
-        $mail->CharSet = 'UTF-8';
-
-        // Recipients
-        $mail->setFrom($smtpFromEmail, $smtpFromName);
-        $mail->addAddress($toEmail, $toName);
-
         // Build reset URL
-        $resetUrl = "https://alpha-edu.up.railway.app/reset-password?token=" . urlencode($resetToken);
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'http://192.168.1.5:3000';
+        $resetUrl = $frontendUrl . "/reset-password?token=" . urlencode($resetToken);
 
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'إعادة تعيين كلمة السر - منصة ألفا';
-
-        // HTML Body with beautiful template
-        $mail->Body = getPasswordResetEmailTemplate($toName, $resetUrl);
+        // Create email
+        $email = new Mail();
+        $email->setFrom($fromEmail, $fromName);
+        $email->setSubject('إعادة تعيين كلمة السر - منصة ألفا');
+        $email->addTo($toEmail, $toName);
+        $email->addContent("text/html", getPasswordResetEmailTemplate($toName, $resetUrl));
 
         // Plain text alternative
-        $mail->AltBody = "مرحباً " . $toName . "،\n\n"
+        $plainText = "مرحباً " . $toName . "،\n\n"
             . "تلقينا طلبًا لإعادة تعيين كلمة السر الخاصة بحسابك في منصة ألفا.\n\n"
             . "لإعادة تعيين كلمة السر، يرجى نسخ الرابط التالي في المتصفح:\n"
             . "$resetUrl\n\n"
             . "الرابط صالح لمدة ساعة واحدة فقط.\n\n"
             . "إذا لم تطلب إعادة تعيين كلمة السر، يرجى تجاهل هذا البريد.\n\n"
             . "مع تحيات،\nفريق منصة ألفا";
+        $email->addContent("text/plain", $plainText);
 
-        $mail->send();
-        error_log("[EMAIL] Password reset email sent to: $toEmail");
-        return true;
+        // Send via SendGrid
+        $sendgrid = new \SendGrid($sendgridApiKey);
+        $response = $sendgrid->send($email);
+
+        if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
+            error_log("[EMAIL] Password reset email sent to: $toEmail");
+            return true;
+        } else {
+            error_log("[EMAIL] SendGrid error: " . $response->statusCode() . " - " . $response->body());
+            return false;
+        }
 
     } catch (Exception $e) {
-        error_log("[EMAIL] Failed to send password reset email: {$mail->ErrorInfo}");
+        error_log("[EMAIL] Failed to send password reset email: " . $e->getMessage());
         return false;
     }
 }
@@ -90,60 +79,50 @@ function sendPasswordResetEmail($toEmail, $toName, $resetToken)
  */
 function sendEmailVerification($toEmail, $toName, $verificationToken)
 {
-    $mail = new PHPMailer(true);
-
     try {
-        // Get SMTP settings from environment
-        $smtpHost = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
-        $smtpPort = getenv('SMTP_PORT') ?: 587;
-        $smtpUsername = getenv('SMTP_USERNAME') ?: '';
-        $smtpPassword = getenv('SMTP_PASSWORD') ?: '';
-        $smtpFromEmail = getenv('SMTP_FROM_EMAIL') ?: 'noreply@alpha.edu';
-        $smtpFromName = getenv('SMTP_FROM_NAME') ?: 'منصة ألفا';
+        // Get SendGrid API key
+        $sendgridApiKey = getenv('SENDGRID_API_KEY');
+        $fromEmail = getenv('SMTP_FROM_EMAIL') ?: '1yousefsaleh@gmail.com';
+        $fromName = getenv('SMTP_FROM_NAME') ?: 'منصة ألفا';
 
-        // If SMTP not configured, log and return false
-        if (empty($smtpUsername) || empty($smtpPassword)) {
-            error_log('[EMAIL] SMTP credentials not configured in .env file');
+        if (empty($sendgridApiKey)) {
+            error_log('[EMAIL] SendGrid API key not configured');
             return false;
         }
 
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = $smtpHost;
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtpUsername;
-        $mail->Password = $smtpPassword;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $smtpPort;
-        $mail->CharSet = 'UTF-8';
-
-        // Recipients
-        $mail->setFrom($smtpFromEmail, $smtpFromName);
-        $mail->addAddress($toEmail, $toName);
-
         // Build verification URL
-        $verifyUrl = "https://alpha-edu.up.railway.app/verify-email?token=" . urlencode($verificationToken);
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'http://192.168.1.5:3000';
+        $verifyUrl = $frontendUrl . "/verify-email?token=" . urlencode($verificationToken);
 
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'تأكيد البريد الإلكتروني - منصة ألفا';
-
-        // HTML Body with beautiful template
-        $mail->Body = getEmailVerificationTemplate($toName, $verifyUrl);
+        // Create email
+        $email = new Mail();
+        $email->setFrom($fromEmail, $fromName);
+        $email->setSubject('تأكيد البريد الإلكتروني - منصة ألفا');
+        $email->addTo($toEmail, $toName);
+        $email->addContent("text/html", getEmailVerificationTemplate($toName, $verifyUrl));
 
         // Plain text alternative
-        $mail->AltBody = "مرحباً " . $toName . "،\n\n"
+        $plainText = "مرحباً " . $toName . "،\n\n"
             . "شكراً لتسجيلك في منصة ألفا!\n\n"
             . "لتفعيل حسابك، يرجى نسخ الرابط التالي في المتصفح:\n"
             . "$verifyUrl\n\n"
             . "مع تحيات،\nفريق منصة ألفا";
+        $email->addContent("text/plain", $plainText);
 
-        $mail->send();
-        error_log("[EMAIL] Verification email sent to: $toEmail");
-        return true;
+        // Send via SendGrid
+        $sendgrid = new \SendGrid($sendgridApiKey);
+        $response = $sendgrid->send($email);
+
+        if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
+            error_log("[EMAIL] Verification email sent to: $toEmail");
+            return true;
+        } else {
+            error_log("[EMAIL] SendGrid error: " . $response->statusCode() . " - " . $response->body());
+            return false;
+        }
 
     } catch (Exception $e) {
-        error_log("[EMAIL] Failed to send verification email: {$mail->ErrorInfo}");
+        error_log("[EMAIL] Failed to send verification email: " . $e->getMessage());
         return false;
     }
 }
@@ -333,3 +312,4 @@ function getEmailVerificationTemplate($toName, $verifyUrl)
 </html>
 HTML;
 }
+?>
