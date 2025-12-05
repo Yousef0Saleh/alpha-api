@@ -79,7 +79,7 @@ try {
     if (is_array($answers) && is_array($questions)) {
       foreach ($questions as $q) {
         $qid = $q['id'];
-        $correct_answer = $q['answer']; // Fixed: was 'correct_answer', should be 'answer'
+        $correct_answer = $q['correct_answer'] ?? null; // Support both key formats
         $q_index = $qid - 1;
 
         if ($q_index >= 0 && $q_index < $questions_count) {
