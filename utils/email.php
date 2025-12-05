@@ -31,7 +31,7 @@ function sendPasswordResetEmail($toEmail, $toName, $resetToken)
         }
 
         // Build reset URL
-        $frontendUrl = getenv('FRONTEND_URL') ?: 'http://192.168.1.5:3000';
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'https://alpha-edu.up.railway.app/';
         $resetUrl = $frontendUrl . "/reset-password?token=" . urlencode($resetToken);
 
         // Create email
@@ -91,7 +91,7 @@ function sendEmailVerification($toEmail, $toName, $verificationToken)
         }
 
         // Build verification URL
-        $frontendUrl = getenv('FRONTEND_URL') ?: 'http://192.168.1.5:3000';
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'https://alpha-edu.up.railway.app/';
         $verifyUrl = $frontendUrl . "/verify-email?token=" . urlencode($verificationToken);
 
         // Create email
