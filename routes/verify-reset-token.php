@@ -32,14 +32,23 @@ try {
   $tokenHash = hash('sha256', $token);
 
   // Find token in database
+  // $stmt = $pdo->prepare(
+  //   "SELECT t.id, t.user_id, t.expires_at, t.used_at, u.email, u.is_banned
+  //        FROM password_reset_tokens t
+  //        JOIN users u ON t.user_id = u.id
+  //        WHERE t.token = :token
+  //        LIMIT 1"
+  // );
   $stmt = $pdo->prepare(
-    "SELECT t.id, t.user_id, t.expires_at, t.used_at, u.email, u.is_banned
-         FROM password_reset_tokens t
-         JOIN users u ON t.user_id = u.id
-         WHERE t.token = :token
-         LIMIT 1"
-  );
-  $stmt->execute([':token' => $tokenHash]);
+  "SELECT t.id, t.user_id, t.expires_at, t.used_at, u.email, u.is_banned
+   FROM password_reset_tokens t
+   JOIN users u ON t.user_id = u.id
+   WHERE t.token = :token
+   LIMIT 1"
+);
+$stmt->execute([':token' => $token]);
+
+  // $stmt->execute([':token' => $tokenHash]);
   $tokenData = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if (!$tokenData) {
