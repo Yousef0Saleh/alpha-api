@@ -56,8 +56,8 @@ try {
         }
     }
 
-    if (intval($usage['messages_today']) >= 20) {
-        echo "data: " . json_encode(['error' => 'وصلت للحد اليومي (20 رسالة). ارجع بكرة!']) . "\n\n";
+    if (intval($usage['messages_today']) >= 50) {
+        echo "data: " . json_encode(['error' => 'وصلت للحد اليومي (50 رسالة). ارجع بكرة!']) . "\n\n";
         flush();
         exit;
     }

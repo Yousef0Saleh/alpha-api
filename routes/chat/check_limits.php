@@ -41,10 +41,10 @@ try {
         'status' => 'success',
         'limits' => [
             'messages_used' => intval($usage['messages_today']),
-            'messages_limit' => 20,
+            'messages_limit' => 50,
             'files_used' => intval($usage['files_today']),
             'files_limit' => 3,
-            'can_send_message' => intval($usage['messages_today']) < 20,
+            'can_send_message' => intval($usage['messages_today']) < 50,
             'can_upload_file' => intval($usage['files_today']) < 3
         ]
     ]);

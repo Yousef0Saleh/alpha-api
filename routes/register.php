@@ -78,15 +78,35 @@ if (!in_array($grade, $allowedGrades, true)) {
 $algo = defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT;
 $hashed = password_hash($password, $algo);
 
+$token = bin2hex(random_bytes(16));
+
 // insert user
 try {
-  $stmt = $pdo->prepare("INSERT INTO users (name, email, password, grade, email_verified) VALUES (:name, :email, :password, :grade, TRUE)");
+  $stmt = $pdo->prepare("INSERT INTO users (name, email, password, grade, email_verified, email_verification_token) VALUES (:name, :email, :password, :grade, FALSE, :token)");
+  // $stmt = $pdo->prepare("INSERT INTO users (name, email, password, grade, email_verified) VALUES (:name, :email, :password, :grade, TRUE)");
   $stmt->execute([
     ':name' => $name,
     ':email' => $email,
     ':password' => $hashed,
-    ':grade' => $grade
+    ':grade' => $grade,
+    ':token' => $token
   ]);
+
+  $webhookUrl = 'https://alpha-edu.app.n8n.cloud/webhook/send-verification-email';
+  $postData = [
+      'name' => $name,
+      'email' => $email,
+      'type' => 'verification',
+      'token' => $token
+  ];
+
+  $ch = curl_init($webhookUrl);
+  curl_setopt($ch, CURLOPT_POST, 1);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $response = curl_exec($ch);
+  curl_close($ch);
 
   // created - successful
   respond(201, [
