@@ -335,87 +335,65 @@
 // }
 
 /**
- * Send password reset email via Resend API
- * 
- * @param string $toEmail Recipient email
- * @param string $toName Recipient name
- * @param string $resetToken Reset token
- * @return bool Success status
+ * Send password reset email via n8n webhook
  */
 function sendPasswordResetEmail($toEmail, $toName, $resetToken)
 {
-    $apiKey = getenv('RESEND_API_KEY') ?: 're_KwC212SG_5njCBPijPoKWMNTwMME5XuqC';
+    $webhookUrl = getenv('N8N_RESET_WEBHOOK') ?: 'https://alpha-edu.app.n8n.cloud/webhook/send-reset-password';
     $resetUrl = "https://alpha-edu.up.railway.app/reset-password?token=" . urlencode($resetToken);
-    $htmlBody = getPasswordResetEmailTemplate($toName, $resetUrl);
 
-    $data = [
-        "from" => "onboarding@resend.dev",
-        "to" => $toEmail,
-        "subject" => "إعادة تعيين كلمة السر - منصة ألفا",
-        "html" => $htmlBody
+    $postData = [
+        'name' => $toName,
+        'email' => $toEmail,
+        'resetUrl' => $resetUrl
     ];
 
-    $ch = curl_init("https://api.resend.com/emails");
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: Bearer $apiKey",
-        "Content-Type: application/json"
-    ]);
+    $ch = curl_init($webhookUrl);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($httpCode >= 200 && $httpCode < 300) {
-        error_log("[EMAIL] Password reset email sent to: $toEmail");
+        error_log("[EMAIL] Password reset webhook triggered for: $toEmail");
         return true;
     } else {
-        error_log("[EMAIL] Failed to send password reset email: $response");
+        error_log("[EMAIL] Failed to trigger reset webhook: $response");
         return false;
     }
 }
 
 /**
- * Send email verification email via Resend API
- * 
- * @param string $toEmail Recipient email
- * @param string $toName Recipient name
- * @param string $verificationToken Verification token
- * @return bool Success status
+ * Send email verification via n8n webhook
  */
 function sendEmailVerification($toEmail, $toName, $verificationToken)
 {
-    $apiKey = getenv('RESEND_API_KEY') ?: 're_KwC212SG_5njCBPijPoKWMNTwMME5XuqC';
+    $webhookUrl = getenv('N8N_VERIFY_WEBHOOK') ?: 'https://alpha-edu.app.n8n.cloud/webhook/send-verification-email';
     $verifyUrl = "https://alpha-edu.up.railway.app/verify-email?token=" . urlencode($verificationToken);
-    $htmlBody = getEmailVerificationTemplate($toName, $verifyUrl);
 
-    $data = [
-        "from" => "onboarding@resend.dev",
-        "to" => $toEmail,
-        "subject" => "تأكيد البريد الإلكتروني - منصة ألفا",
-        "html" => $htmlBody
+    $postData = [
+        'name' => $toName,
+        'email' => $toEmail,
+        'verifyUrl' => $verifyUrl
     ];
 
-    $ch = curl_init("https://api.resend.com/emails");
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: Bearer $apiKey",
-        "Content-Type: application/json"
-    ]);
+    $ch = curl_init($webhookUrl);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($httpCode >= 200 && $httpCode < 300) {
-        error_log("[EMAIL] Verification email sent to: $toEmail");
+        error_log("[EMAIL] Verification webhook triggered for: $toEmail");
         return true;
     } else {
-        error_log("[EMAIL] Failed to send verification email: $response");
+        error_log("[EMAIL] Failed to trigger verification webhook: $response");
         return false;
     }
 }
